@@ -1,0 +1,21 @@
+trigger AdvisorActivityTrigger on Activity__c (after insert, after update) {
+    Map<Id, Integer> advisorSiteVisitCountMap = new Map<Id, Integer>();
+
+    for (Activity__c act : Trigger.new) {
+        if (act.Activity_Type__c == 'Site Visit' && act.Advisor__c != null) {
+            if (advisorSiteVisitCountMap.containsKey(act.Advisor__c)) {
+                advisorSiteVisitCountMap.put(act.Advisor__c, advisorSiteVisitCountMap.get(act.Advisor__c) + 1);
+            } else {
+                advisorSiteVisitCountMap.put(act.Advisor__c, 1);
+            }
+        }
+    }
+
+    List<Advisor__c> advisorsToUpdate = [SELECT Id, Site_Visits_Today__c FROM Advisor__c WHERE Id IN :advisorSiteVisitCountMap.keySet()];
+
+    for (Advisor__c adv : advisorsToUpdate) {
+        adv.Site_Visits_Today__c += advisorSiteVisitCountMap.get(adv.Id);
+    }
+
+    update advisorsToUpdate;
+}
