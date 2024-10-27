@@ -1,0 +1,32 @@
+@isTest
+public class ActivityTriggerTest {
+    @isTest static void testTelecallerCallCountUpdate() {
+        // Create a sample Telecaller record
+        Telecaller__c telecaller = new Telecaller__c(Name = 'John Doe', Employee_ID__c = 'TC123');
+        insert telecaller;
+
+        // Create sample Activity records linked to Telecaller
+        Activity__c activity1 = new Activity__c(Telecaller__c = telecaller.Id, Activity_Type__c = 'Call', Description__c = 'Test call 1');
+        Activity__c activity2 = new Activity__c(Telecaller__c = telecaller.Id, Activity_Type__c = 'Call', Description__c = 'Test call 2');
+        insert new List<Activity__c>{activity1, activity2};
+
+        // Verify that the Total_Calls_Today__c field increments by 2
+        Telecaller__c updatedTelecaller = [SELECT Id, Total_Calls_Today__c FROM Telecaller__c WHERE Id = :telecaller.Id];
+        System.assertEquals(2, updatedTelecaller.Total_Calls_Today__c);
+    }
+
+    @isTest static void testAdvisorSiteVisitCountUpdate() {
+        // Create a sample Advisor record
+        Advisor__c advisor = new Advisor__c(Name = 'Jane Smith', Employee_ID__c = 'AD123');
+        insert advisor;
+
+        // Create sample Activity records linked to Advisor
+        Activity__c activity1 = new Activity__c(Advisor__c = advisor.Id, Activity_Type__c = 'Site Visit', Description__c = 'Test visit 1');
+        Activity__c activity2 = new Activity__c(Advisor__c = advisor.Id, Activity_Type__c = 'Site Visit', Description__c = 'Test visit 2');
+        insert new List<Activity__c>{activity1, activity2};
+
+        // Verify that the Site_Visits_Today__c field increments by 2
+        Advisor__c updatedAdvisor = [SELECT Id, Site_Visits_Today__c FROM Advisor__c WHERE Id = :advisor.Id];
+        System.assertEquals(2, updatedAdvisor.Site_Visits_Today__c);
+    }
+}
