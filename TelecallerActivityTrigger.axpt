@@ -1,0 +1,21 @@
+trigger TelecallerActivityTrigger on Activity__c (after insert, after update) {
+    Map<Id, Integer> telecallerCallCountMap = new Map<Id, Integer>();
+
+    for (Activity__c act : Trigger.new) {
+        if (act.Activity_Type__c == 'Call' && act.Telecaller__c != null) {
+            if (telecallerCallCountMap.containsKey(act.Telecaller__c)) {
+                telecallerCallCountMap.put(act.Telecaller__c, telecallerCallCountMap.get(act.Telecaller__c) + 1);
+            } else {
+                telecallerCallCountMap.put(act.Telecaller__c, 1);
+            }
+        }
+    }
+
+    List<Telecaller__c> telecallersToUpdate = [SELECT Id, Total_Calls_Today__c FROM Telecaller__c WHERE Id IN :telecallerCallCountMap.keySet()];
+
+    for (Telecaller__c tc : telecallersToUpdate) {
+        tc.Total_Calls_Today__c += telecallerCallCountMap.get(tc.Id);
+    }
+
+    update telecallersToUpdate;
+}
